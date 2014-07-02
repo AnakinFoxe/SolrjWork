@@ -29,6 +29,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
+import edu.csupomona.ml.SimpleKMeans;
 
 /**
  *
@@ -74,9 +75,10 @@ public class Searcher {
         Integer num = 40;
         for (String key : tmp.keySet()) {
             System.out.println(key + ":" + tmp.get(key).toString());
-            num--;
+            
             if (num <= 0)
                 dict.remove(key);
+            num--;
         }
     }
     
@@ -134,6 +136,40 @@ public class Searcher {
         }
         bw.close();
     }
+    
+    
+    public void TestKMeansLib(SolrDocumentList results) throws IOException {
+        // load the file into Dataset
+        Dataset data = FileHandler.loadDataset(new File("data.txt"), 40, ",");
+        
+        // create an instance of kMeans algorithm
+        // 5 clusters, 50 iterations
+        Clusterer km = new KMeans(5, 100);
+        
+        // cluster the data, it will be returned as an array of data sets, 
+        // with each dataset representing a cluster
+        Dataset[] clusters = km.cluster(data);
+        
+        System.out.println("Cluster count: " + clusters.length);
+        for (Dataset cluster : clusters) {
+            System.out.println("cluster size: " + cluster.size());
+            for (Instance item :cluster) {
+//                String idx = (String)item.classValue();
+                System.out.println(results.get(Integer.parseInt((String)item.classValue())).get("title"));
+
+            }
+        }
+        
+        
+        System.out.println("total number of results: " + results.size());
+    }
+    
+    
+    public void TestKMeans() {
+        SimpleKMeans kmeans = new SimpleKMeans(4, 40);
+        kmeans.readDataSet("/data/data.txt");
+        kmeans.run();
+    }
 
     
     public static void main(String[] args) 
@@ -162,31 +198,11 @@ public class Searcher {
         // write the most significant term-frequency into file
         sch.write(tf_list, "data.txt");
         
-        // load the file into Dataset
-        Dataset data = FileHandler.loadDataset(new File("data.txt"), 39, ",");
+        // test KMeans from Java ML lib
+//        sch.TestKMeansLib(results);
         
-        // create an instance of kMeans algorithm
-        // 5 clusters, 50 iterations
-        Clusterer km = new KMeans(5, 100);
-        
-        // cluster the data, it will be returned as an array of data sets, 
-        // with each dataset representing a cluster
-        Dataset[] clusters = km.cluster(data);
-        
-        System.out.println("Cluster count: " + clusters.length);
-        for (Dataset cluster : clusters) {
-            System.out.println("cluster size: " + cluster.size());
-            for (Instance item :cluster) {
-//                String idx = (String)item.classValue();
-                System.out.println(results.get(Integer.parseInt((String)item.classValue())).get("title"));
-
-            }
-        }
-        
-        
-        System.out.println("total number of results: " + results.size());
-        
-        
+        // test a simple implementation of KMeans
+        sch.TestKMeans();
     }
     
 }
