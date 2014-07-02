@@ -28,6 +28,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
 /**
@@ -107,7 +108,7 @@ public class Searcher {
         return term_frequency;
     }
     
-    public void write(List tf_list, List title_list, String filename) 
+    public void write(List tf_list, String filename) 
             throws IOException{        
         // trim the dict to remove words with too few counts
         trimDict();
@@ -116,7 +117,7 @@ public class Searcher {
         FileWriter fw = new FileWriter(filename, false);
         BufferedWriter bw = new BufferedWriter(fw);
         Iterator<HashMap<String, Integer>> it_tf = tf_list.iterator();
-        Iterator<String> it_title = title_list.iterator();
+        Integer index = 0;
         while (it_tf.hasNext()) {
             // for each document
             HashMap<String, Integer> tf = it_tf.next();
@@ -129,7 +130,8 @@ public class Searcher {
                 // write the value and separate with a comma
                 bw.write(value + ",");
             }
-            bw.write(it_title.next() + "\n");
+            bw.write(index.toString() + "\n");
+            index++;
         }
         bw.close();
     }
@@ -140,7 +142,7 @@ public class Searcher {
         HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr");
 
         SolrQuery param = new SolrQuery();
-        param.set("q", "tech");
+        param.set("q", "news");
         param.set("rows", "1000");
     //    query.addFilterQuery("cat:electronics","store:amazon.com");
     //    query.setFields("id","price","merchant","cat","store");
@@ -154,15 +156,12 @@ public class Searcher {
         
         // parse the result text and obtain term-frequency mapping
         List tf_list = new ArrayList();
-        List title_list = new ArrayList();
         for (int i = 0; i < results.size(); ++i) {
-//            System.out.println(results.get(i).get("content").toString());
             tf_list.add(sch.parseText(results.get(i).get("content").toString()));
-            title_list.add(results.get(i).get("title").toString());
         }
         
         // write the most significant term-frequency into file
-        sch.write(tf_list, title_list, "data.txt");
+        sch.write(tf_list, "data.txt");
         
         // load the file into Dataset
         Dataset data = FileHandler.loadDataset(new File("data.txt"), 39, ",");
@@ -179,10 +178,11 @@ public class Searcher {
         for (Dataset cluster : clusters) {
             System.out.println("cluster size: " + cluster.size());
             for (Instance item :cluster) {
-                System.out.println(item.toString());
+//                String idx = (String)item.classValue();
+                System.out.println(results.get(Integer.parseInt((String)item.classValue())).get("title"));
+
             }
         }
-        
         
         
         System.out.println("total number of results: " + results.size());
