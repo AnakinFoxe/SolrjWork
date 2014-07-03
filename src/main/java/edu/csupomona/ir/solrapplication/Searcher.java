@@ -165,8 +165,8 @@ public class Searcher {
     }
     
     
-    public void TestKMeans() {
-        SimpleKMeans kmeans = new SimpleKMeans(4, 40);
+    public void TestKMeans(Integer size) {
+        SimpleKMeans kmeans = new SimpleKMeans(4, 40, size);
         kmeans.readDataSet("/data/data.txt");
         kmeans.run();
     }
@@ -202,7 +202,7 @@ public class Searcher {
 //        sch.TestKMeansLib(results);
         
         // test a simple implementation of KMeans
-        sch.TestKMeans();
+        sch.TestKMeans(results.size());
     }
     
 }

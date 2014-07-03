@@ -44,9 +44,10 @@ public class SimpleKMeans {
             }
 	}
 
-	public SimpleKMeans(int clusters, int dimension) {
+	public SimpleKMeans(int clusters, int dimension, int size) {
             this.kClusters = clusters;
             this.dimension = dimension;
+            this.dataSetSize = size;
             this.points = new ArrayList<List<Double>>(dataSetSize);
             this.clustersCentroids = new ArrayList<List<Double>>(kClusters);
             this.clustersMapping = new ArrayList<List<Integer>>(kClusters);
@@ -307,7 +308,7 @@ public class SimpleKMeans {
 	}
 
 	public static void main(String[] args) {
-            SimpleKMeans kmeans = new SimpleKMeans(4, 40);
+            SimpleKMeans kmeans = new SimpleKMeans(4, 40, 281);
 //            kmeans.readDataSet();
             kmeans.readDataSet("/data/data.txt");
             kmeans.run();
